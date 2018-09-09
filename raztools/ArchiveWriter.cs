@@ -17,20 +17,28 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 */
 
 
+using System;
 using System.IO;
 
 namespace raztools
 {
-    public class ArchiveWriter
+    public class ArchiveWriter : IDisposable
     {
         public ArchiveWriter(string archive, bool append = true)
         {
+            m_archive = new FileStream(archive, append ? FileMode.Append : FileMode.Create);
+
 
         }
 
         public bool Compress(string filename, string dest_filename)
         {
             return false;
+        }
+
+        public void Dispose()
+        {
+            m_archive.Close();
         }
 
         private FileStream m_archive;
