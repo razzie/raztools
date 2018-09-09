@@ -16,31 +16,62 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 */
 
-
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace raztools
 {
-    public class ArchiveReader
+    public class ArchiveReader : IDisposable
     {
         public class FileInfo
         {
-            public string FileName { get; set; }
-            public ulong Size { get; set; }
+            public string FileName { get; private set; }
+            public ulong Size { get; private set; }
+            public int Index { get; private set; }
+
+            public FileInfo(string filename, ulong size, int index)
+            {
+                FileName = filename;
+                Size = size;
+                Index = index;
+            }
         }
 
         class InternalFileInfo
         {
             public string FileName { get; set; }
-            ulong Position { get; set; }
-            ulong OriginalSize { get; set; }
-            ulong CompressedSize { get; set; }
+            public ulong OriginalSize { get; set; }
+            public ulong CompressedSize { get; set; }
+            public long Position { get; set; }
         }
 
         public ArchiveReader(string archive)
         {
+            m_archive = new FileStream(archive, FileMode.Open);
 
+            var end = m_archive.Length;
+            using (var reader = new BinaryReader(m_archive, Encoding.UTF8, true))
+            {
+                while (m_archive.Position != end)
+                {
+                    var info = new InternalFileInfo();
+
+                    var filename_len = reader.ReadUInt32();
+                    var filename = new byte[filename_len];
+                    reader.Read(filename, 0, filename.Length);
+                    info.FileName = Encoding.UTF8.GetString(filename);
+
+                    info.OriginalSize = reader.ReadUInt64();
+                    info.CompressedSize = reader.ReadUInt64();
+                    info.Position = m_archive.Position;
+                    m_files.Add(info);
+
+                    m_archive.Position = info.Position + (long)info.CompressedSize;
+                }
+            }
         }
 
         public int FileCount
@@ -48,19 +79,41 @@ namespace raztools
             get { return m_files.Count; }
         }
 
-        int? GetFileIndex(string filename)
+        public FileInfo GetFile(string filename)
         {
+            var file = m_files.First(f => f.FileName == filename);
+            if (file != null)
+            {
+                return new FileInfo(file.FileName, file.OriginalSize, m_files.IndexOf(file));
+            }
+
             return null;
         }
 
-        FileInfo GetFileInfo(string filename)
+        public byte[] Decompress(FileInfo file)
         {
-            return null;
+            lock (m_archive)
+            {
+                var info = m_files[file.Index];
+                var compressed = new byte[info.CompressedSize];
+                var decompressed = new byte[info.OriginalSize];
+
+                m_archive.Position = info.Position;
+                m_archive.Read(compressed, 0, compressed.Length);
+
+                new Doboz.Decompressor().Decompress(compressed, decompressed);
+                return decompressed;
+            }
         }
 
-        byte[] Decompress(int fileindex)
+        public Stream GetStream(FileInfo file)
         {
-            return null;
+            return new MemoryStream(Decompress(file));
+        }
+
+        public void Dispose()
+        {
+            m_archive.Close();
         }
 
         private FileStream m_archive;
