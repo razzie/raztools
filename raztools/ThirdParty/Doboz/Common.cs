@@ -23,7 +23,7 @@
 using System;
 using System.Diagnostics;
 
-namespace raztools.ThirdParty.Doboz
+namespace Doboz
 {
     enum Result
     {

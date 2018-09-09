@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArchiveReader.cs" />
+    <Compile Include="ArchiveWriter.cs" />
     <Compile Include="CommandParser.cs" />
     <Compile Include="PluginManager.cs" />
     <Compile Include="ObjectDeserializer.cs" />
