@@ -41,6 +41,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThirdParty\Doboz\Common.cs" />
+    <Compile Include="ThirdParty\Doboz\Compressor.cs" />
+    <Compile Include="ThirdParty\Doboz\Decompressor.cs" />
+    <Compile Include="ThirdParty\Doboz\Dictionary.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
