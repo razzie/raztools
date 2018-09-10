@@ -43,10 +43,14 @@
   <ItemGroup>
     <Compile Include="ArchiveExample.cs" />
     <Compile Include="IExample.cs" />
+    <Compile Include="ObjectDeserializerExample.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\lorem_ipsum.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\dummy.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
