@@ -21,10 +21,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace raztools
 {
-    public static class ObjectDeserializer
+    public class ObjectDeserializer
     {
         public class ParseError : Exception
         {
@@ -143,7 +145,11 @@ namespace raztools
             }
         }
 
-        private static object ParseSimple(Type type, string value)
+        public Assembly[] Assemblies { get; private set; }
+
+        public Dictionary<string, object> Results { get; } = new Dictionary<string, object>();
+
+        static private object ParseSimple(Type type, string value)
         {
             if (type == typeof(int))
             {
@@ -157,7 +163,7 @@ namespace raztools
             return null;
         }
 
-        private static IEnumerable ParseArray(Token name_token, StreamWrapper stream, Type type)
+        private IEnumerable ParseArray(Token name_token, StreamWrapper stream, Type type)
         {
             var first_token = new Token(stream.ReadLine());
             if (first_token.Type != TokenType.NestingBegin)
@@ -194,11 +200,15 @@ namespace raztools
             throw new Exception("unexpected ond of stream");
         }
 
-        private static object ParseNested(Token name_token, StreamWrapper stream, Type type = null)
+        private object ParseNested(Token name_token, StreamWrapper stream, Type type = null)
         {
             if (type == null)
             {
-                type = Type.GetType(name_token.KeyType); // namespace is important!
+                foreach (var assembly in Assemblies)
+                {
+                    type = assembly.GetType(name_token.KeyType); // namespace is important!
+                    if (type != null) break;
+                }
             }
 
             if (type.IsArray)
@@ -215,7 +225,7 @@ namespace raztools
 
             while (!stream.EndOfStream)
             {
-                System.Reflection.FieldInfo field;
+                FieldInfo field;
                 var token = new Token(stream.ReadLine());
 
                 switch (token.Type)
@@ -241,7 +251,17 @@ namespace raztools
             throw new Exception("unexpected ond of stream");
         }
 
-        public static void ParseStream(StreamReader streamreader, IDictionary<string, object> cache)
+        public ObjectDeserializer(Assembly assembly)
+        {
+            Assemblies = new Assembly[] { assembly };
+        }
+
+        public ObjectDeserializer(IEnumerable<Assembly> assemblies)
+        {
+            Assemblies = assemblies.ToArray();
+        }
+
+        public void ParseStream(StreamReader streamreader)
         {
             StreamWrapper stream = new StreamWrapper(streamreader);
 
@@ -256,7 +276,7 @@ namespace raztools
                             break;
 
                         case TokenType.KeyOnly:
-                            cache.Add(token.Key, ParseNested(token, stream));
+                            Results.Add(token.Key, ParseNested(token, stream));
                             break;
 
                         case TokenType.KeyValue:
@@ -272,11 +292,11 @@ namespace raztools
             }
         }
 
-        public static void ParseStream(Stream stream, IDictionary<string, object> cache)
+        public void ParseStream(Stream stream)
         {
             using (var streamreader = new StreamReader(stream))
             {
-                ParseStream(streamreader, cache);
+                ParseStream(streamreader);
             }
         }
     }

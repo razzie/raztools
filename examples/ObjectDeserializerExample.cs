@@ -18,7 +18,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
 using raztools;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace examples
@@ -42,15 +41,15 @@ namespace examples
     {
         public int Run()
         {
-            var cache = new Dictionary<string, object>();
             var assembly = Assembly.GetExecutingAssembly();
+            var deserializer = new ObjectDeserializer(assembly);
 
             using (var stream = assembly.GetManifestResourceStream("examples.Resources.dummy.txt"))
             {
-                ObjectDeserializer.ParseStream(stream, cache);
+                deserializer.ParseStream(stream);
             }
 
-            foreach (var item in cache)
+            foreach (var item in deserializer.Results)
             {
                 Console.WriteLine("{0} - {1}", item.Key.ToString(), item.Value.ToString());
             }
