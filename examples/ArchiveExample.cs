@@ -27,7 +27,7 @@ namespace examples
     {
         public int Run()
         {
-            using (var writer = new ArchiveWriter("test_archive.pak"))
+            using (var writer = new ArchiveWriter("test_archive.pak", false))
             {
                 writer.Compress(Assembly.GetExecutingAssembly(), "examples.Resources.lorem_ipsum.txt", "lorem_ipsum.txt");
             }
