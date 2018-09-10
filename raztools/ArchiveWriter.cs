@@ -16,9 +16,9 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 */
 
-
 using System;
 using System.IO;
+using System.Text;
 
 namespace raztools
 {
@@ -27,13 +27,28 @@ namespace raztools
         public ArchiveWriter(string archive, bool append = true)
         {
             m_archive = new FileStream(archive, append ? FileMode.Append : FileMode.Create);
-
-
         }
 
-        public bool Compress(string filename, string dest_filename)
+        public void Compress(string source_filename, string dest_filename)
         {
-            return false;
+            var uncompressed = File.ReadAllBytes(source_filename);
+            var compressed_size = Doboz.Compressor.GetMaxCompressedSize(uncompressed.Length);
+            var compressed = new byte[compressed_size];
+
+            new Doboz.Compressor().Compress(uncompressed, compressed, ref compressed_size);
+
+            using (var writer = new BinaryWriter(m_archive, Encoding.UTF8, true))
+            {
+                var filename = Encoding.UTF8.GetBytes(dest_filename);
+                writer.Write((uint)filename.Length);
+                writer.Write(filename);
+
+                writer.Write((ulong)uncompressed.Length);
+                writer.Write((ulong)compressed_size);
+                writer.Write(compressed, 0, compressed_size);
+
+                m_archive.Flush();
+            }
         }
 
         public void Dispose()
