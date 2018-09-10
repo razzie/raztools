@@ -271,5 +271,13 @@ namespace raztools
                 throw new ParseError(stream.LineNum, e);
             }
         }
+
+        public static void ParseStream(Stream stream, IDictionary<string, object> cache)
+        {
+            using (var streamreader = new StreamReader(stream))
+            {
+                ParseStream(streamreader, cache);
+            }
+        }
     }
 }
