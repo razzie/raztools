@@ -74,6 +74,17 @@ namespace raztools
             }
         }
 
+        public IEnumerable<FileInfo> Files
+        {
+            get
+            {
+                foreach (var file in m_files)
+                {
+                    yield return new FileInfo(file.FileName, file.OriginalSize, m_files.IndexOf(file));
+                }
+            }
+        }
+
         public int FileCount
         {
             get { return m_files.Count; }
