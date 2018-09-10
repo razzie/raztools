@@ -19,7 +19,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace raztools
@@ -52,6 +51,7 @@ namespace raztools
         {
             m_archive = new FileStream(archive, FileMode.Open);
 
+            var files = new List<InternalFileInfo>();
             var end = m_archive.Length;
             using (var reader = new BinaryReader(m_archive, Encoding.UTF8, true))
             {
@@ -67,35 +67,39 @@ namespace raztools
                     info.OriginalSize = reader.ReadUInt64();
                     info.CompressedSize = reader.ReadUInt64();
                     info.Position = m_archive.Position;
-                    m_files.Add(info);
+                    files.Add(info);
 
                     m_archive.Position = info.Position + (long)info.CompressedSize;
                 }
             }
+            m_files = files.ToArray();
         }
 
         public IEnumerable<FileInfo> Files
         {
             get
             {
-                foreach (var file in m_files)
+                for (int i = 0; i < m_files.Length; ++i)
                 {
-                    yield return new FileInfo(file.FileName, file.OriginalSize, m_files.IndexOf(file));
+                    yield return new FileInfo(m_files[i].FileName, m_files[i].OriginalSize, i);
                 }
             }
         }
 
         public int FileCount
         {
-            get { return m_files.Count; }
+            get { return m_files.Length; }
         }
 
         public FileInfo GetFile(string filename)
         {
-            var file = m_files.First(f => f.FileName == filename);
-            if (file != null)
+            for (int i = 0; i < m_files.Length; ++i)
             {
-                return new FileInfo(file.FileName, file.OriginalSize, m_files.IndexOf(file));
+                var file = m_files[i];
+                if (file.FileName == filename)
+                {
+                    return new FileInfo(file.FileName, file.OriginalSize, i);
+                }
             }
 
             return null;
@@ -123,6 +127,6 @@ namespace raztools
         }
 
         private FileStream m_archive;
-        private List<InternalFileInfo> m_files = new List<InternalFileInfo>();
+        private InternalFileInfo[] m_files;
     }
 }
