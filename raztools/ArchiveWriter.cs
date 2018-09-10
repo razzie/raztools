@@ -59,17 +59,20 @@ namespace raztools
 
             new Doboz.Compressor().Compress(uncompressed, compressed, ref compressed_size);
 
-            using (var writer = new BinaryWriter(m_archive, Encoding.UTF8, true))
+            lock (m_archive)
             {
-                var filename = Encoding.UTF8.GetBytes(dest_filename);
-                writer.Write((uint)filename.Length);
-                writer.Write(filename);
+                using (var writer = new BinaryWriter(m_archive, Encoding.UTF8, true))
+                {
+                    var filename = Encoding.UTF8.GetBytes(dest_filename);
+                    writer.Write((uint)filename.Length);
+                    writer.Write(filename);
 
-                writer.Write((ulong)uncompressed.Length);
-                writer.Write((ulong)compressed_size);
-                writer.Write(compressed, 0, compressed_size);
+                    writer.Write((ulong)uncompressed.Length);
+                    writer.Write((ulong)compressed_size);
+                    writer.Write(compressed, 0, compressed_size);
 
-                m_archive.Flush();
+                    m_archive.Flush();
+                }
             }
         }
 
