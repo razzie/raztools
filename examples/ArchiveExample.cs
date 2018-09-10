@@ -16,38 +16,29 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 */
 
+using raztools;
 using System;
-using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace examples
 {
-    class Program
+    public class ArchiveExample : IExample
     {
-        static private Type[] Examples { get; } =
-            Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && !t.IsAbstract && typeof(IExample).IsAssignableFrom(t)).ToArray();
-
-        static int Main(string[] args)
+        public int Run()
         {
-            if (Examples.Length > 0)
+            using (var writer = new ArchiveWriter("test_archive.pak"))
             {
-                try
-                {
-                    for (int i = 0; i < Examples.Length; ++i)
-                    {
-                        Console.WriteLine("#{0} - {1}", i + 1, Examples[i].Name);
-                    }
+                writer.Compress(Assembly.GetExecutingAssembly(), "examples.Resources.lorem_ipsum.txt", "lorem_ipsum.txt");
+            }
 
-                    var selection = int.Parse(Console.ReadLine());
-                    var example = Activator.CreateInstance(Examples[selection - 1]) as IExample;
-                    return example.Run();
-                }
-                catch (Exception e)
-                {
-                    for (; e.InnerException != null; e = e.InnerException) ;
+            using (var reader = new ArchiveReader("test_archive.pak"))
+            {
+                var file = reader.GetFile("lorem_ipsum.txt");
+                var data = reader.Decompress(file);
 
-                    Console.WriteLine("Error: " + e.Message);
-                }
+                string content = Encoding.ASCII.GetString(data);
+                Console.WriteLine(content);
             }
 
             return 0;
