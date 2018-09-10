@@ -92,23 +92,18 @@ namespace raztools
 
         public byte[] Decompress(FileInfo file)
         {
+            var info = m_files[file.Index];
+            var compressed = new byte[info.CompressedSize];
+            var decompressed = new byte[info.OriginalSize];
+
             lock (m_archive)
             {
-                var info = m_files[file.Index];
-                var compressed = new byte[info.CompressedSize];
-                var decompressed = new byte[info.OriginalSize];
-
                 m_archive.Position = info.Position;
                 m_archive.Read(compressed, 0, compressed.Length);
-
-                new Doboz.Decompressor().Decompress(compressed, decompressed);
-                return decompressed;
             }
-        }
 
-        public Stream GetStream(FileInfo file)
-        {
-            return new MemoryStream(Decompress(file));
+            new Doboz.Decompressor().Decompress(compressed, decompressed);
+            return decompressed;
         }
 
         public void Dispose()
