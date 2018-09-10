@@ -18,6 +18,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace raztools
@@ -53,11 +54,26 @@ namespace raztools
 
         public void Compress(string source_filename, string dest_filename)
         {
-            var uncompressed = File.ReadAllBytes(source_filename);
-            var compressed_size = Doboz.Compressor.GetMaxCompressedSize(uncompressed.Length);
+            var data = File.ReadAllBytes(source_filename);
+            Compress(data, dest_filename);
+        }
+
+        public void Compress(Assembly assembly, string embedded_filename, string dest_filename)
+        {
+            using (var stream = assembly.GetManifestResourceStream(embedded_filename))
+            {
+                var data = new byte[stream.Length];
+                stream.Read(data, 0, data.Length);
+                Compress(data, dest_filename);
+            }
+        }
+
+        public void Compress(byte[] data, string dest_filename)
+        {
+            var compressed_size = Doboz.Compressor.GetMaxCompressedSize(data.Length);
             var compressed = new byte[compressed_size];
 
-            new Doboz.Compressor().Compress(uncompressed, compressed, ref compressed_size);
+            new Doboz.Compressor().Compress(data, compressed, ref compressed_size);
 
             lock (m_archive)
             {
@@ -67,7 +83,7 @@ namespace raztools
                     writer.Write((uint)filename.Length);
                     writer.Write(filename);
 
-                    writer.Write((ulong)uncompressed.Length);
+                    writer.Write((ulong)data.Length);
                     writer.Write((ulong)compressed_size);
                     writer.Write(compressed, 0, compressed_size);
 
