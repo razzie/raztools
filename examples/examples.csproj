@@ -41,8 +41,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArchiveExample.cs" />
     <Compile Include="IExample.cs" />
     <Compile Include="Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lorem_ipsum.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
