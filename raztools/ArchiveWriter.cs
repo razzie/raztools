@@ -29,6 +29,28 @@ namespace raztools
             m_archive = new FileStream(archive, append ? FileMode.Append : FileMode.Create);
         }
 
+        public void CompressDirectory(string directory)
+        {
+            CompressDirectory(directory, directory);
+        }
+
+        public void CompressDirectory(string directory, string root)
+        {
+            var dir = new DirectoryInfo(directory);
+            var rootdir = new DirectoryInfo(root);
+
+            foreach (var file in dir.GetFiles())
+            {
+                string relative_filename = new Uri(rootdir.FullName).MakeRelativeUri(new Uri(file.FullName)).LocalPath;
+                Compress(file.FullName, relative_filename);
+            }
+
+            foreach (var subdir in dir.GetDirectories())
+            {
+                CompressDirectory(subdir.FullName, root);
+            }
+        }
+
         public void Compress(string source_filename, string dest_filename)
         {
             var uncompressed = File.ReadAllBytes(source_filename);
