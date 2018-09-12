@@ -23,7 +23,7 @@ using System.Reflection;
 
 namespace raztools
 {
-    public class SandboxDomain
+    public class PluginDomain
     {
         public event EventHandler<AppDomain> Unloaded;
 
@@ -35,7 +35,7 @@ namespace raztools
         private Dictionary<string, string> Assemblies { get; } = new Dictionary<string, string>();
         public List<RemoteClass> Classes { get; } = new List<RemoteClass>();
 
-        public SandboxDomain(string folder)
+        public PluginDomain(string folder)
         {
             Folder = folder;
             CreateDomain();

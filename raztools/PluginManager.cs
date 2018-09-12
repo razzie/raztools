@@ -25,9 +25,9 @@ namespace raztools
 {
     public class PluginManager<Plugin> : IDisposable where Plugin : class
     {
-        static private SandboxDomain Domain { get; } = new SandboxDomain("plugins/");
+        static private PluginDomain Domain { get; } = new PluginDomain("plugins/");
 
-        private ConcurrentDictionary<string, Plugin> m_plugins = new ConcurrentDictionary<string, Plugin>();
+        protected ConcurrentDictionary<string, Plugin> Plugins { get; } = new ConcurrentDictionary<string, Plugin>();
 
         static public string Available
         {
@@ -41,14 +41,14 @@ namespace raztools
         {
             get
             {
-                return string.Join(", ", m_plugins.Keys);
+                return string.Join(", ", Plugins.Keys);
             }
         }
 
         public Plugin Add(string plugin)
         {
             var plugin_obj = Domain.Create(plugin) as Plugin;
-            if (plugin_obj != null && m_plugins.TryAdd(plugin, plugin_obj))
+            if (plugin_obj != null && Plugins.TryAdd(plugin, plugin_obj))
             {
                 Domain.Unloaded += (sender, domain) => Remove(plugin);
                 return plugin_obj;
@@ -60,14 +60,14 @@ namespace raztools
         public Plugin Get(string plugin)
         {
             Plugin plugin_obj = null;
-            m_plugins.TryGetValue(plugin, out plugin_obj);
+            Plugins.TryGetValue(plugin, out plugin_obj);
             return plugin_obj;
         }
 
         public bool Remove(string plugin)
         {
             Plugin plugin_obj;
-            if (m_plugins.TryRemove(plugin, out plugin_obj))
+            if (Plugins.TryRemove(plugin, out plugin_obj))
             {
                 (plugin_obj as IDisposable)?.Dispose();
                 return true;
@@ -78,7 +78,7 @@ namespace raztools
 
         public void Dispose()
         {
-            foreach (var plugin in m_plugins.Values)
+            foreach (var plugin in Plugins.Values)
             {
                 try
                 {
@@ -88,7 +88,7 @@ namespace raztools
                 {
                 }
             }
-            m_plugins.Clear();
+            Plugins.Clear();
         }
 
         static public void Load()
