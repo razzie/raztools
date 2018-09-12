@@ -34,7 +34,7 @@ namespace raztools
 
             public Command(string template, Delegate method)
             {
-                string pattern = "^" + Regex.Replace(Regex.Escape(template), @"\{[0-9]+\}", "(.*?)") + "$";
+                string pattern = "^" + Regex.Replace(Regex.Escape(template), @"\\\{[0-9]+\}", "(.*?)") + "$";
 
                 Template = template;
                 RegexPattern = new Regex(pattern);
