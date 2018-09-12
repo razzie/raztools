@@ -61,9 +61,29 @@ namespace raztools
             return null;
         }
 
-        public RemoteClass[] LoadAssemblyClasses(AssemblyName assembly)
+        public RemoteClass[] LoadAssemblyClasses(AssemblyName aname)
         {
-            return LoadAssembly(assembly).RemoteClasses(typeof(MarshalByRefObject)).ToArray();
+            var assembly = LoadAssembly(aname);
+            return assembly.RemoteClasses(typeof(MarshalByRefObject)).ToArray();
+        }
+
+        public RemoteClass[] FilterClasses(RemoteClass[] classes, string baseclass_name)
+        {
+            var baseclass = GetType(baseclass_name);
+            var filtered = new List<RemoteClass>();
+
+            foreach (var c in classes)
+            {
+                Assembly assembly;
+                if (LoadedAssemblies.TryGetValue(c.AssemblyName, out assembly))
+                {
+                    var type = assembly.GetType(c.Namespace + "." + c.TypeNme);
+                    if (baseclass.IsAssignableFrom(type))
+                        filtered.Add(c);
+                }
+            }
+
+            return filtered.ToArray();
         }
 
         static private FileInfo FindDLL(string dir, AssemblyName assembly)
@@ -77,6 +97,18 @@ namespace raztools
             return FindDLL(Domain.BaseDirectory + Folder, assembly) ?? FindDLL(Domain.BaseDirectory, assembly);
         }
 
+        private Type GetType(string typename)
+        {
+            foreach (var assembly in LoadedAssemblies.Values)
+            {
+                var type = assembly.GetType(typename);
+                if (type != null)
+                    return type;
+            }
+
+            return null;
+        }
+
         private Assembly LoadAssembly(AssemblyName assembly)
         {
             if (LoadedAssemblies.ContainsKey(assembly.FullName))
@@ -87,10 +119,12 @@ namespace raztools
             FileInfo dll = FindDLL(assembly);
             if (dll != null)
             {
-                return LoadDependencies(Assembly.LoadFile(dll.FullName));
+                byte[] raw = File.ReadAllBytes(dll.FullName);
+                //return LoadDependencies(Assembly.LoadFile(dll.FullName));
+                return LoadDependencies(Domain.Load(raw));
             }
 
-            return Assembly.Load(assembly);
+            return Domain.Load(assembly);
         }
 
         private Assembly LoadDependencies(Assembly assembly)
