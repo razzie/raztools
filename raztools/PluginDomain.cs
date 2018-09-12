@@ -19,6 +19,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace raztools
@@ -31,9 +32,24 @@ namespace raztools
         private AppDomain Domain { get; set; }
         private RemoteLoader Loader { get; set; }
         private string Folder { get; set; }
-        private FileInfo[] DLLs { get { return new DirectoryInfo(Folder).GetFiles("*.dll"); } }
         private Dictionary<string, string> Assemblies { get; } = new Dictionary<string, string>();
-        public List<RemoteClass> Classes { get; } = new List<RemoteClass>();
+        public RemoteClass[] Classes { get; private set; } = new RemoteClass[0];
+
+        private FileInfo[] DLLs
+        {
+            get
+            {
+                return new DirectoryInfo(Folder).GetFiles("*.dll");
+            }
+        }
+
+        public string ClassNames
+        {
+            get
+            {
+                return string.Join(", ", Classes.Select(c => c.TypeNme).ToArray());
+            }
+        }
 
         public PluginDomain(string folder)
         {
@@ -60,7 +76,7 @@ namespace raztools
 
             var setup = new AppDomainSetup()
             {
-                //ShadowCopyFiles = "true",
+                ShadowCopyFiles = "false",
                 //CachePath = AppFolder,
                 //ShadowCopyDirectories = AppFolder,
                 ApplicationBase = AppFolder,
@@ -72,10 +88,11 @@ namespace raztools
             Loader.Folder = Folder;
         }
 
-        public void Load()
+        public void Load(Type baseclass)
         {
             CreateDomain();
 
+            var classes = new List<RemoteClass>();
             foreach (var file in DLLs)
             {
                 var aname = AssemblyName.GetAssemblyName(file.FullName);
@@ -85,16 +102,21 @@ namespace raztools
                     if (!aname.FullName.Equals(cached_aname))
                     {
                         Unload();
-                        Load();
+                        Load(baseclass);
                         return;
                     }
                 }
                 else
                 {
-                    Classes.AddRange(RemoteLoadAssemblyClasses(Loader, aname));
+                    classes.AddRange(Loader.LoadAssemblyClasses(aname));
                     Assemblies.Add(file.FullName, aname.FullName);
                 }
             }
+
+            if (baseclass == null)
+                Classes = classes.ToArray();
+            else
+                Classes = Loader.FilterClasses(classes.ToArray(), baseclass.FullName);
         }
 
         public void Unload()
@@ -110,12 +132,7 @@ namespace raztools
             Unloaded = null;
 
             Assemblies.Clear();
-            Classes.Clear();
-        }
-
-        static private RemoteClass[] RemoteLoadAssemblyClasses(RemoteLoader loader, AssemblyName assembly)
-        {
-            return loader.LoadAssemblyClasses(assembly);
+            Classes = new RemoteClass[0];
         }
     }
 }

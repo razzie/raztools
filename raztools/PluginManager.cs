@@ -18,22 +18,36 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Runtime.Remoting;
 
 namespace raztools
 {
     public class PluginManager<Plugin> : IDisposable where Plugin : class
     {
-        static private PluginDomain Domain { get; } = new PluginDomain("plugins/");
+        static private ConcurrentDictionary<string, PluginDomain> Domains { get; } = new ConcurrentDictionary<string, PluginDomain>();
 
+        protected PluginDomain Domain { get; private set; }
         protected ConcurrentDictionary<string, Plugin> Plugins { get; } = new ConcurrentDictionary<string, Plugin>();
 
-        static public string Available
+        public PluginManager(string plugin_folder)
+        {
+            PluginDomain domain;
+            if (Domains.TryGetValue(plugin_folder, out domain))
+            {
+                Domain = domain;
+            }
+            else
+            {
+                domain = new PluginDomain(plugin_folder);
+                Domains.TryAdd(plugin_folder, domain);
+            }
+        }
+
+        public string Available
         {
             get
             {
-                return string.Join(", ", Domain.Classes.Select(c => c.TypeNme).ToArray());
+                return Domain.ClassNames;
             }
         }
 
@@ -91,14 +105,37 @@ namespace raztools
             Plugins.Clear();
         }
 
-        static public void Load()
+        static public string ClassNames(string plugin_folder)
         {
-            Domain.Load();
+            PluginDomain domain;
+            if (Domains.TryGetValue(plugin_folder, out domain))
+            {
+                return domain.ClassNames;
+            }
+
+            return null;
         }
 
-        static public void Unload()
+        static public string Load(string plugin_folder)
         {
-            Domain.Unload();
+            PluginDomain domain;
+            if (!Domains.TryGetValue(plugin_folder, out domain))
+            {
+                domain = new PluginDomain(plugin_folder);
+                Domains.TryAdd(plugin_folder, domain);
+            }
+
+            domain.Load(typeof(Plugin));
+            return domain.ClassNames;
+        }
+
+        static public void Unload(string plugin_folder)
+        {
+            PluginDomain domain;
+            if (Domains.TryGetValue(plugin_folder, out domain))
+            {
+                domain.Unload();
+            }
         }
     }
 }
