@@ -74,12 +74,25 @@ namespace raztools
 
             foreach (var c in classes)
             {
-                Assembly assembly;
-                if (LoadedAssemblies.TryGetValue(c.AssemblyName, out assembly))
+                if (LoadedAssemblies.TryGetValue(c.AssemblyName, out Assembly assembly))
                 {
                     var type = assembly.GetType(c.Namespace + "." + c.TypeNme);
-                    if (baseclass.IsAssignableFrom(type))
-                        filtered.Add(c);
+                    if (baseclass.IsInterface)
+                    {
+                        if (type.GetInterfaces().Any(i => i.FullName == baseclass.FullName))
+                            filtered.Add(c);
+                    }
+                    else
+                    {
+                        for (Type t = type; t != null; t = t.BaseType)
+                        {
+                            if (t.FullName == baseclass.FullName)
+                            {
+                                filtered.Add(c);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
