@@ -52,12 +52,11 @@ namespace raztools
 
         public MarshalByRefObject CreateInstance(RemoteClass rclass)
         {
-            Assembly assembly;
-            if (LoadedAssemblies.TryGetValue(rclass.AssemblyName, out assembly))
+            if (LoadedAssemblies.TryGetValue(rclass.AssemblyName, out Assembly assembly))
             {
                 return (MarshalByRefObject)assembly.CreateInstance(rclass.Namespace + "." + rclass.TypeNme);
             }
-            
+
             return null;
         }
 
