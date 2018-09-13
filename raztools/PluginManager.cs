@@ -31,8 +31,7 @@ namespace raztools
 
         public PluginManager(string plugin_folder)
         {
-            PluginDomain domain;
-            if (Domains.TryGetValue(plugin_folder, out domain))
+            if (Domains.TryGetValue(plugin_folder, out PluginDomain domain))
             {
                 Domain = domain;
             }
@@ -73,15 +72,13 @@ namespace raztools
 
         public Plugin Get(string plugin)
         {
-            Plugin plugin_obj = null;
-            Plugins.TryGetValue(plugin, out plugin_obj);
+            Plugins.TryGetValue(plugin, out Plugin plugin_obj);
             return plugin_obj;
         }
 
         public bool Remove(string plugin)
         {
-            Plugin plugin_obj;
-            if (Plugins.TryRemove(plugin, out plugin_obj))
+            if (Plugins.TryRemove(plugin, out Plugin plugin_obj))
             {
                 (plugin_obj as IDisposable)?.Dispose();
                 return true;
@@ -107,8 +104,7 @@ namespace raztools
 
         static public string ClassNames(string plugin_folder)
         {
-            PluginDomain domain;
-            if (Domains.TryGetValue(plugin_folder, out domain))
+            if (Domains.TryGetValue(plugin_folder, out PluginDomain domain))
             {
                 return domain.ClassNames;
             }
@@ -118,8 +114,7 @@ namespace raztools
 
         static public string Load(string plugin_folder)
         {
-            PluginDomain domain;
-            if (!Domains.TryGetValue(plugin_folder, out domain))
+            if (!Domains.TryGetValue(plugin_folder, out PluginDomain domain))
             {
                 domain = new PluginDomain(plugin_folder);
                 Domains.TryAdd(plugin_folder, domain);
@@ -131,8 +126,7 @@ namespace raztools
 
         static public void Unload(string plugin_folder)
         {
-            PluginDomain domain;
-            if (Domains.TryGetValue(plugin_folder, out domain))
+            if (Domains.TryGetValue(plugin_folder, out PluginDomain domain))
             {
                 domain.Unload();
             }

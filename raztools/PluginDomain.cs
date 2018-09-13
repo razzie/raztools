@@ -96,8 +96,7 @@ namespace raztools
             foreach (var file in DLLs)
             {
                 var aname = AssemblyName.GetAssemblyName(file.FullName);
-                string cached_aname;
-                if (Assemblies.TryGetValue(file.FullName, out cached_aname))
+                if (Assemblies.TryGetValue(file.FullName, out string cached_aname))
                 {
                     if (!aname.FullName.Equals(cached_aname))
                     {
