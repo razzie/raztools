@@ -72,16 +72,16 @@ namespace Doboz
             switch (size)
             {
                 case 4:
-                    return BitConverter.ToUInt32(source, 0);
+                    return BitConverter.ToUInt32(source, sourceOffset);
 
                 case 3:
-                    return BitConverter.ToUInt32(source, 0);
+                    return BitConverter.ToUInt32(source, sourceOffset);
 
                 case 2:
-                    return BitConverter.ToUInt16(source, 0);
+                    return BitConverter.ToUInt16(source, sourceOffset);
 
                 case 1:
-                    return source[0];
+                    return source[sourceOffset];
 
                 default:
                     return 0; // dummy
@@ -97,19 +97,19 @@ namespace Doboz
             switch (size)
             {
                 case 4:
-                    Array.Copy(BitConverter.GetBytes(word), destination, sizeof(uint));
+                    Array.Copy(BitConverter.GetBytes(word), 0, destination, destinationOffset, sizeof(uint));
                     break;
 
                 case 3:
-                    Array.Copy(BitConverter.GetBytes(word), destination, sizeof(uint));
+                    Array.Copy(BitConverter.GetBytes(word), 0, destination, destinationOffset, sizeof(uint));
                     break;
 
                 case 2:
-                    Array.Copy(BitConverter.GetBytes((ushort)word), destination, sizeof(ushort));
+                    Array.Copy(BitConverter.GetBytes((ushort)word), 0, destination, destinationOffset, sizeof(ushort));
                     break;
 
                 case 1:
-                    destination[0] = (byte)word;
+                    destination[destinationOffset] = (byte)word;
                     break;
             }
         }
