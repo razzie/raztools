@@ -57,13 +57,13 @@ namespace raztools
             CreateDomain();
         }
 
-        public MarshalByRefObject Create(string typename)
+        public MarshalByRefObject Create(string typename, params object[] args)
         {
             foreach (var rclass in Classes)
             {
                 if (rclass.TypeNme.Equals(typename))
                 {
-                    return Loader.CreateInstance(rclass);
+                    return Loader.CreateInstance(rclass, args);
                 }
             }
 

@@ -50,11 +50,13 @@ namespace raztools
             Domain.AssemblyResolve += (sender, args) => LoadAssembly(new AssemblyName(args.Name));
         }
 
-        public MarshalByRefObject CreateInstance(RemoteClass rclass)
+        public MarshalByRefObject CreateInstance(RemoteClass rclass, params object[] args)
         {
             if (LoadedAssemblies.TryGetValue(rclass.AssemblyName, out Assembly assembly))
             {
-                return (MarshalByRefObject)assembly.CreateInstance(rclass.Namespace + "." + rclass.TypeNme);
+                var type = assembly.GetType(rclass.Namespace + "." + rclass.TypeNme);
+                var constructor = type.GetConstructor(args.Select(a => a.GetType()).ToArray());
+                return (MarshalByRefObject)constructor.Invoke(args);
             }
 
             return null;
@@ -132,7 +134,6 @@ namespace raztools
             if (dll != null)
             {
                 byte[] raw = File.ReadAllBytes(dll.FullName);
-                //return LoadDependencies(Assembly.LoadFile(dll.FullName));
                 return LoadDependencies(Domain.Load(raw));
             }
 
