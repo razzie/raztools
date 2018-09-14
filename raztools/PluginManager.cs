@@ -58,9 +58,9 @@ namespace raztools
             }
         }
 
-        public Plugin Add(string plugin)
+        public virtual Plugin Add(string plugin, params object[] args)
         {
-            var plugin_obj = Domain.Create(plugin) as Plugin;
+            var plugin_obj = Domain.Create(plugin, args) as Plugin;
             if (plugin_obj != null && Plugins.TryAdd(plugin, plugin_obj))
             {
                 Domain.Unloaded += (sender, domain) => Remove(plugin);
@@ -70,13 +70,13 @@ namespace raztools
             return null;
         }
 
-        public Plugin Get(string plugin)
+        public virtual Plugin Get(string plugin)
         {
             Plugins.TryGetValue(plugin, out Plugin plugin_obj);
             return plugin_obj;
         }
 
-        public bool Remove(string plugin)
+        public virtual bool Remove(string plugin)
         {
             if (Plugins.TryRemove(plugin, out Plugin plugin_obj))
             {
@@ -87,7 +87,7 @@ namespace raztools
             return false;
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             foreach (var plugin in Plugins.Values)
             {
