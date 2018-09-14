@@ -30,6 +30,11 @@ namespace raztools
             m_archive = new FileStream(archive, append ? FileMode.Append : FileMode.Create);
         }
 
+        ~ArchiveWriter()
+        {
+            Dispose();
+        }
+
         public void CompressDirectory(string directory)
         {
             CompressDirectory(directory, directory);

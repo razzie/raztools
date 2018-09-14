@@ -75,6 +75,11 @@ namespace raztools
             m_files = files.ToArray();
         }
 
+        ~ArchiveReader()
+        {
+            Dispose();
+        }
+
         public IEnumerable<FileInfo> Files
         {
             get
