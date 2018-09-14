@@ -37,8 +37,8 @@ namespace raztools
             }
             else
             {
-                domain = new PluginDomain(plugin_folder);
-                Domains.TryAdd(plugin_folder, domain);
+                Domain = new PluginDomain(plugin_folder);
+                Domains.TryAdd(plugin_folder, Domain);
             }
         }
 

@@ -92,7 +92,7 @@ namespace raztools
         {
             CreateDomain();
 
-            var classes = new List<RemoteClass>();
+            var classes = new List<RemoteClass>(Classes);
             foreach (var file in DLLs)
             {
                 var aname = AssemblyName.GetAssemblyName(file.FullName);
