@@ -48,9 +48,7 @@ namespace raztools
                 if (!match.Success)
                     return null;
 
-                string[] args = new string[match.Groups.Count];
-                match.Groups.CopyTo(args, 0);
-                return args;
+                return match.Groups.Cast<Group>().Select(g => g.Value).Skip(1).ToArray();
             }
 
             public bool Invoke(string input)
