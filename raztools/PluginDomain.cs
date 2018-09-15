@@ -70,6 +70,23 @@ namespace raztools
             return null;
         }
 
+        static private FileInfo FindDLL(string dir, AssemblyName assembly)
+        {
+            string dll = assembly.Name + ".dll";
+            return new DirectoryInfo(dir).GetFiles().FirstOrDefault(f => f.Name.Equals(dll, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            var dll = FindDLL(Folder, new AssemblyName(args.Name));
+            if (dll != null)
+            {
+                return Assembly.LoadFile(dll.FullName);
+            }
+
+            return null;
+        }
+
         private void CreateDomain()
         {
             if (Domain != null) return;
@@ -83,6 +100,7 @@ namespace raztools
                 PrivateBinPath = AppFolder
             };
 
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             Domain = AppDomain.CreateDomain(Guid.NewGuid().ToString(), AppDomain.CurrentDomain.Evidence, setup, Assembly.GetExecutingAssembly().PermissionSet);
             Loader = (RemoteLoader)Domain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(RemoteLoader).FullName);
             Loader.Folder = Folder;
@@ -125,6 +143,7 @@ namespace raztools
                 Unloaded?.Invoke(this, Domain);
 
                 AppDomain.Unload(Domain);
+                AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
                 Domain = null;
             }
 
