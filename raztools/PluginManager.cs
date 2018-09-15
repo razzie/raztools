@@ -40,6 +40,16 @@ namespace raztools
                 Domain = new PluginDomain(plugin_folder);
                 Domains.TryAdd(plugin_folder, Domain);
             }
+
+            Domain.Unloaded += DomainUnloaded;
+        }
+
+        private void DomainUnloaded(object sender, AppDomain e)
+        {
+            foreach (var plugin in Plugins.ToArray())
+            {
+                Remove(plugin.Key);
+            }
         }
 
         public string Available
@@ -63,7 +73,6 @@ namespace raztools
             var plugin_obj = Domain.Create(plugin, args) as Plugin;
             if (plugin_obj != null && Plugins.TryAdd(plugin, plugin_obj))
             {
-                Domain.Unloaded += (sender, domain) => Remove(plugin);
                 return plugin_obj;
             }
 
