@@ -43,7 +43,7 @@ namespace raztools
 
             public void AddArchive(string archive)
             {
-                Archives.Add(new ArchiveReader(archive));
+                Archives.Add(FileSystem.GetArchive(archive));
             }
 
             public byte[] GetFileData(string file, bool cache_file = false)
@@ -83,6 +83,17 @@ namespace raztools
         }
 
         static private Dictionary<string, Container> Containers { get; } = new Dictionary<string, Container>();
+        static internal Dictionary<string, ArchiveReader> Archives { get; } = new Dictionary<string, ArchiveReader>();
+
+        static internal ArchiveReader GetArchive(string archive_file)
+        {
+            if (Archives.TryGetValue(archive_file, out ArchiveReader archive))
+                return archive;
+
+            archive = new ArchiveReader(archive_file);
+            Archives.Add(archive_file, archive);
+            return archive;
+        }
 
         static public Container GetContainer(string name)
         {
