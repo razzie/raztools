@@ -55,8 +55,24 @@ namespace raztools
             if (LoadedAssemblies.TryGetValue(rclass.AssemblyName, out Assembly assembly))
             {
                 var type = assembly.GetType(rclass.Namespace + "." + rclass.TypeNme);
-                var constructor = type.GetConstructor(args.Select(a => a.GetType()).ToArray());
-                return (MarshalByRefObject)constructor.Invoke(args);
+                var constructors = type.GetConstructors().Where(c => c.GetParameters().Length == args.Length);
+                foreach (var constructor in constructors)
+                {
+                    bool match = true;
+                    var paramtypes = constructor.GetParameters().Select(p => p.ParameterType).ToArray();
+                    for (int i = 0; i < paramtypes.Length; ++i)
+                    {
+                        if (!IsAssignable(paramtypes[i], args[i].GetType()))
+                        {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (match)
+                    {
+                        return (MarshalByRefObject)constructor.Invoke(args);
+                    }
+                }
             }
 
             return null;
@@ -78,37 +94,12 @@ namespace raztools
                 if (LoadedAssemblies.TryGetValue(c.AssemblyName, out Assembly assembly))
                 {
                     var type = assembly.GetType(c.Namespace + "." + c.TypeNme);
-                    if (baseclass.IsInterface)
-                    {
-                        if (type.GetInterfaces().Any(i => i.FullName == baseclass.FullName))
-                            filtered.Add(c);
-                    }
-                    else
-                    {
-                        for (Type t = type; t != null; t = t.BaseType)
-                        {
-                            if (t.FullName == baseclass.FullName)
-                            {
-                                filtered.Add(c);
-                                break;
-                            }
-                        }
-                    }
+                    if (IsAssignable(baseclass, type))
+                        filtered.Add(c);
                 }
             }
 
             return filtered.ToArray();
-        }
-
-        static private FileInfo FindDLL(string dir, AssemblyName assembly)
-        {
-            string dll = assembly.Name + ".dll";
-            return new DirectoryInfo(dir).GetFiles().FirstOrDefault(f => f.Name.Equals(dll, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        private FileInfo FindDLL(AssemblyName assembly)
-        {
-            return FindDLL(Domain.BaseDirectory + Folder, assembly) ?? FindDLL(Domain.BaseDirectory, assembly);
         }
 
         private Type GetType(string typename)
@@ -121,6 +112,38 @@ namespace raztools
             }
 
             return null;
+        }
+
+        static private bool IsAssignable(Type baseclass, Type derived)
+        {
+            if (baseclass.IsInterface)
+            {
+                if (derived.GetInterfaces().Any(i => i.FullName == baseclass.FullName))
+                    return true;
+            }
+            else
+            {
+                for (Type t = derived; t != null; t = t.BaseType)
+                {
+                    if (t.FullName == baseclass.FullName)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        static private FileInfo FindDLL(string dir, AssemblyName assembly)
+        {
+            string dll = assembly.Name + ".dll";
+            return new DirectoryInfo(dir).GetFiles().FirstOrDefault(f => f.Name.Equals(dll, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        private FileInfo FindDLL(AssemblyName assembly)
+        {
+            return FindDLL(Domain.BaseDirectory + Folder, assembly) ?? FindDLL(Domain.BaseDirectory, assembly);
         }
 
         private Assembly LoadAssembly(AssemblyName assembly)
