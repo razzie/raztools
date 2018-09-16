@@ -54,6 +54,7 @@
     <Compile Include="ThirdParty\Doboz\Decompressor.cs" />
     <Compile Include="ThirdParty\Doboz\Dictionary.cs" />
     <Compile Include="Timeout.cs" />
+    <Compile Include="XmlReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
