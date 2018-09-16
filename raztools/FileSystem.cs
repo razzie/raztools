@@ -48,15 +48,22 @@ namespace raztools
 
             public byte[] GetFileData(string file, bool cache_file = false)
             {
-                {
-                    if (Cache.TryGetValue(file, out byte[] data))
-                        return data;
-                }
-
+                if (Cache.TryGetValue(file, out byte[] data))
+                    return data;
+                
                 foreach (var dir in Directories)
                 {
-                    // TODO: search in directory
+                    var path = Path.Combine(dir.FullName, file);
+                    var file_info = new FileInfo(path);
+                    if (file_info.Exists)
+                    {
+                        data = File.ReadAllBytes(file_info.FullName);
 
+                        if (cache_file && data != null)
+                            Cache.Add(file, data);
+
+                        return data;
+                    }
                 }
 
                 foreach (var archive in Archives)
@@ -64,9 +71,9 @@ namespace raztools
                     var result = archive.GetFile(file);
                     if (result != null)
                     {
-                        var data = archive.Decompress(result);
+                        data = archive.Decompress(result);
 
-                        if (cache_file)
+                        if (cache_file && data != null)
                             Cache.Add(file, data);
 
                         return data;
@@ -98,15 +105,11 @@ namespace raztools
         static public Container GetContainer(string name)
         {
             if (Containers.TryGetValue(name, out Container container))
-            {
                 return container;
-            }
-            else
-            {
-                container = new Container(name);
-                Containers.Add(name, container);
-                return container;
-            }
+
+            container = new Container(name);
+            Containers.Add(name, container);
+            return container;
         }
 
         static public void RemoveContainer(string name)
