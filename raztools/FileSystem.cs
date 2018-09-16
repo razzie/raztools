@@ -16,18 +16,20 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 */
 
-using System.Collections.Generic;
+using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 
 namespace raztools
 {
     public static class FileSystem
     {
-        public class Container
+        public class Container : IDisposable
         {
-            private Dictionary<string, byte[]> Cache { get; } = new Dictionary<string, byte[]>();
-            private List<DirectoryInfo> Directories { get; } = new List<DirectoryInfo>();
-            private List<ArchiveReader> Archives { get; } = new List<ArchiveReader>();
+            private ConcurrentDictionary<string, byte[]> Cache { get; } = new ConcurrentDictionary<string, byte[]>();
+            private DirectoryInfo[] Directories { get; set; } = new DirectoryInfo[0];
+            private ArchiveReader[] Archives { get; set; } = new ArchiveReader[0];
 
             public string Name { get; private set; }
 
@@ -36,14 +38,19 @@ namespace raztools
                 Name = name;
             }
 
+            ~Container()
+            {
+                Dispose();
+            }
+
             public void AddDirectory(string dir)
             {
-                Directories.Add(new DirectoryInfo(dir));
+                Directories = Directories.Concat(new[] { new DirectoryInfo(dir) }).ToArray();
             }
 
             public void AddArchive(string archive)
             {
-                Archives.Add(FileSystem.GetArchive(archive));
+                Archives = Archives.Concat(new[] { FileSystem.GetArchive(archive) }).ToArray();
             }
 
             public byte[] GetFileData(string file, bool cache_file = false)
@@ -60,7 +67,7 @@ namespace raztools
                         data = File.ReadAllBytes(file_info.FullName);
 
                         if (cache_file && data != null)
-                            Cache.Add(file, data);
+                            Cache.TryAdd(file, data);
 
                         return data;
                     }
@@ -74,7 +81,7 @@ namespace raztools
                         data = archive.Decompress(result);
 
                         if (cache_file && data != null)
-                            Cache.Add(file, data);
+                            Cache.TryAdd(file, data);
 
                         return data;
                     }
@@ -87,10 +94,17 @@ namespace raztools
             {
                 Cache.Clear();
             }
+
+            public void Dispose()
+            {
+                Cache.Clear();
+                Directories = null;
+                Archives = null;
+            }
         }
 
-        static private Dictionary<string, Container> Containers { get; } = new Dictionary<string, Container>();
-        static internal Dictionary<string, ArchiveReader> Archives { get; } = new Dictionary<string, ArchiveReader>();
+        static private ConcurrentDictionary<string, Container> Containers { get; } = new ConcurrentDictionary<string, Container>();
+        static internal ConcurrentDictionary<string, ArchiveReader> Archives { get; } = new ConcurrentDictionary<string, ArchiveReader>();
 
         static internal ArchiveReader GetArchive(string archive_file)
         {
@@ -98,7 +112,7 @@ namespace raztools
                 return archive;
 
             archive = new ArchiveReader(archive_file);
-            Archives.Add(archive_file, archive);
+            Archives.TryAdd(archive_file, archive);
             return archive;
         }
 
@@ -108,13 +122,13 @@ namespace raztools
                 return container;
 
             container = new Container(name);
-            Containers.Add(name, container);
+            Containers.TryAdd(name, container);
             return container;
         }
 
         static public void RemoveContainer(string name)
         {
-            Containers.Remove(name);
+            Containers.TryRemove(name, out Container container);
         }
     }
 }
