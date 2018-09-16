@@ -45,12 +45,18 @@ namespace raztools
 
             public void AddDirectory(string dir)
             {
-                Directories = Directories.Concat(new[] { new DirectoryInfo(dir) }).ToArray();
+                lock (Directories)
+                {
+                    Directories = Directories.Concat(new[] { new DirectoryInfo(dir) }).ToArray();
+                }
             }
 
             public void AddArchive(string archive)
             {
-                Archives = Archives.Concat(new[] { FileSystem.GetArchive(archive) }).ToArray();
+                lock (Archives)
+                {
+                    Archives = Archives.Concat(new[] { FileSystem.GetArchive(archive) }).ToArray();
+                }
             }
 
             public byte[] GetFileData(string file, bool cache_file = false)
