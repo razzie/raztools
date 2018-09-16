@@ -47,7 +47,13 @@ namespace raztools
 
         public RemoteLoader()
         {
+            //System.Runtime.Remoting.Lifetime.LifetimeServices.LeaseTime = TimeSpan.MaxValue;
             Domain.AssemblyResolve += (sender, args) => LoadAssembly(new AssemblyName(args.Name));
+        }
+
+        public override object InitializeLifetimeService()
+        {
+            return null;
         }
 
         public MarshalByRefObject CreateInstance(RemoteClass rclass, params object[] args)
