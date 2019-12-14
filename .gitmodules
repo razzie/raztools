@@ -1,0 +1,3 @@
+[submodule "raztools/ThirdParty/Doboz"]
+	path = raztools/ThirdParty/Doboz
+	url = https://github.com/razzie/Doboz.NET.git
