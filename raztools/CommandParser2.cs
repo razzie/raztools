@@ -45,13 +45,13 @@ namespace raztools
         public void Add<T1, T2, T3, T4, T5>(string cmd, Action<T1, T2, T3, T4, T5> method) => Add(cmd, Command.FromAction(method));
         public void Add<T1, T2, T3, T4, T5, T6>(string cmd, Action<T1, T2, T3, T4, T5, T6> method) => Add(cmd, Command.FromAction(method));
 
-        public void AddWithReturnValue<R>(string cmd, Func<R> method) => Add(cmd, Command.FromTask(method));
-        public void AddWithReturnValue<T, R>(string cmd, Func<T, R> method) => Add(cmd, Command.FromTask(method));
-        public void AddWithReturnValue<T1, T2, R>(string cmd, Func<T1, T2, R> method) => Add(cmd, Command.FromTask(method));
-        public void AddWithReturnValue<T1, T2, T3, R>(string cmd, Func<T1, T2, T3, R> method) => Add(cmd, Command.FromTask(method));
-        public void AddWithReturnValue<T1, T2, T3, T4, R>(string cmd, Func<T1, T2, T3, T4, R> method) => Add(cmd, Command.FromTask(method));
-        public void AddWithReturnValue<T1, T2, T3, T4, T5, R>(string cmd, Func<T1, T2, T3, T4, T5, R> method) => Add(cmd, Command.FromTask(method));
-        public void AddWithReturnValue<T1, T2, T3, T4, T5, T6, R>(string cmd, Func<T1, T2, T3, T4, T5, T6, R> method) => Add(cmd, Command.FromTask(method));
+        public void AddWithReturnValue<R>(string cmd, Func<R> method) => Add(cmd, Command.FromFunc(method));
+        public void AddWithReturnValue<T, R>(string cmd, Func<T, R> method) => Add(cmd, Command.FromFunc(method));
+        public void AddWithReturnValue<T1, T2, R>(string cmd, Func<T1, T2, R> method) => Add(cmd, Command.FromFunc(method));
+        public void AddWithReturnValue<T1, T2, T3, R>(string cmd, Func<T1, T2, T3, R> method) => Add(cmd, Command.FromFunc(method));
+        public void AddWithReturnValue<T1, T2, T3, T4, R>(string cmd, Func<T1, T2, T3, T4, R> method) => Add(cmd, Command.FromFunc(method));
+        public void AddWithReturnValue<T1, T2, T3, T4, T5, R>(string cmd, Func<T1, T2, T3, T4, T5, R> method) => Add(cmd, Command.FromFunc(method));
+        public void AddWithReturnValue<T1, T2, T3, T4, T5, T6, R>(string cmd, Func<T1, T2, T3, T4, T5, T6, R> method) => Add(cmd, Command.FromFunc(method));
 
         public void Add(string cmd, Command method)
         {
@@ -162,7 +162,7 @@ namespace raztools
                 });
             }
 
-            public static Command FromTask<R>(Func<R> method)
+            public static Command FromFunc<R>(Func<R> method)
             {
                 return new Command(args =>
                 {
@@ -171,7 +171,7 @@ namespace raztools
                 });
             }
 
-            public static Command FromTask<T, R>(Func<T, R> method)
+            public static Command FromFunc<T, R>(Func<T, R> method)
             {
                 return new Command(args =>
                 {
@@ -180,7 +180,7 @@ namespace raztools
                 });
             }
 
-            public static Command FromTask<T1, T2, R>(Func<T1, T2, R> method)
+            public static Command FromFunc<T1, T2, R>(Func<T1, T2, R> method)
             {
                 return new Command(args =>
                 {
@@ -189,7 +189,7 @@ namespace raztools
                 });
             }
 
-            public static Command FromTask<T1, T2, T3, R>(Func<T1, T2, T3, R> method)
+            public static Command FromFunc<T1, T2, T3, R>(Func<T1, T2, T3, R> method)
             {
                 return new Command(args =>
                 {
@@ -198,7 +198,7 @@ namespace raztools
                 });
             }
 
-            public static Command FromTask<T1, T2, T3, T4, R>(Func<T1, T2, T3, T4, R> method)
+            public static Command FromFunc<T1, T2, T3, T4, R>(Func<T1, T2, T3, T4, R> method)
             {
                 return new Command(args =>
                 {
@@ -207,7 +207,7 @@ namespace raztools
                 });
             }
 
-            public static Command FromTask<T1, T2, T3, T4, T5, R>(Func<T1, T2, T3, T4, T5, R> method)
+            public static Command FromFunc<T1, T2, T3, T4, T5, R>(Func<T1, T2, T3, T4, T5, R> method)
             {
                 return new Command(args =>
                 {
@@ -216,7 +216,7 @@ namespace raztools
                 });
             }
 
-            public static Command FromTask<T1, T2, T3, T4, T5, T6, R>(Func<T1, T2, T3, T4, T5, T6, R> method)
+            public static Command FromFunc<T1, T2, T3, T4, T5, T6, R>(Func<T1, T2, T3, T4, T5, T6, R> method)
             {
                 return new Command(args =>
                 {
