@@ -37,7 +37,6 @@ namespace raztools
             return (T)System.Convert.ChangeType(value, typeof(T));
         }
 
-        #region Action generic overloads
         public void Add(string cmd, Action method) => Add(cmd, Command.FromAction(method));
         public void Add<T>(string cmd, Action<T> method) => Add(cmd, Command.FromAction(method));
         public void Add<T1, T2>(string cmd, Action<T1, T2> method) => Add(cmd, Command.FromAction(method));
@@ -45,9 +44,7 @@ namespace raztools
         public void Add<T1, T2, T3, T4>(string cmd, Action<T1, T2, T3, T4> method) => Add(cmd, Command.FromAction(method));
         public void Add<T1, T2, T3, T4, T5>(string cmd, Action<T1, T2, T3, T4, T5> method) => Add(cmd, Command.FromAction(method));
         public void Add<T1, T2, T3, T4, T5, T6>(string cmd, Action<T1, T2, T3, T4, T5, T6> method) => Add(cmd, Command.FromAction(method));
-        #endregion // Action generic overloads
 
-        #region Func generic overloads with return value
         public void AddWithReturnValue<R>(string cmd, Func<R> method) => Add(cmd, Command.FromTask(method));
         public void AddWithReturnValue<T, R>(string cmd, Func<T, R> method) => Add(cmd, Command.FromTask(method));
         public void AddWithReturnValue<T1, T2, R>(string cmd, Func<T1, T2, R> method) => Add(cmd, Command.FromTask(method));
@@ -55,7 +52,6 @@ namespace raztools
         public void AddWithReturnValue<T1, T2, T3, T4, R>(string cmd, Func<T1, T2, T3, T4, R> method) => Add(cmd, Command.FromTask(method));
         public void AddWithReturnValue<T1, T2, T3, T4, T5, R>(string cmd, Func<T1, T2, T3, T4, T5, R> method) => Add(cmd, Command.FromTask(method));
         public void AddWithReturnValue<T1, T2, T3, T4, T5, T6, R>(string cmd, Func<T1, T2, T3, T4, T5, T6, R> method) => Add(cmd, Command.FromTask(method));
-        #endregion // Func generic overloads with return value
 
         public void Add(string cmd, Command method)
         {
