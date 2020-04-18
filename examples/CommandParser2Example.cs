@@ -23,13 +23,20 @@ namespace examples
 {
     public class CommandParser2Example : IExample
     {
+        public static int Add(int a, int b)
+        {
+            return a + b;
+        }
+
         public int Run()
         {
             var cmdparser = new CommandParser2();
 
-            cmdparser.Add<int, int>("!add", (a, b) => Console.WriteLine("a + b = {0}", a + b));
+            cmdparser.Add("hello", () => Console.WriteLine("Hello!"));
+            cmdparser.AddWithReturnValue<int, int, int>("add", Add);
 
-            cmdparser.Exec("!add 2 4");
+            cmdparser.Exec("hello");
+            Console.WriteLine(cmdparser.Exec("add 2 4"));
 
             return 0;
         }
