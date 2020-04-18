@@ -43,6 +43,7 @@
     <Compile Include="ArchiveReader.cs" />
     <Compile Include="ArchiveWriter.cs" />
     <Compile Include="CommandParser.cs" />
+    <Compile Include="CommandParser2.cs" />
     <Compile Include="FileSystem.cs" />
     <Compile Include="PluginManager.cs" />
     <Compile Include="ObjectDeserializer.cs" />
