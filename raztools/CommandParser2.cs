@@ -22,9 +22,11 @@ using System.Linq;
 
 namespace raztools
 {
+    using Command = Func<string[], object>;
+
     public class CommandParser2
     {
-        private Dictionary<string, Action<string[]>> m_commands = new Dictionary<string, Action<string[]>>();
+        private Dictionary<string, Command> m_commands = new Dictionary<string, Command>();
 
         private static void EnsureArgCount(int got, int want)
         {
@@ -44,6 +46,7 @@ namespace raztools
             {
                 EnsureArgCount(args.Length, 0);
                 method();
+                return null;
             });
         }
 
@@ -53,6 +56,7 @@ namespace raztools
             {
                 EnsureArgCount(args.Length, 1);
                 method(Convert<T>(args[0]));
+                return null;
             });
         }
 
@@ -62,6 +66,7 @@ namespace raztools
             {
                 EnsureArgCount(args.Length, 2);
                 method(Convert<T1>(args[0]), Convert<T2>(args[1]));
+                return null;
             });
         }
 
@@ -71,6 +76,7 @@ namespace raztools
             {
                 EnsureArgCount(args.Length, 3);
                 method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]));
+                return null;
             });
         }
 
@@ -80,6 +86,7 @@ namespace raztools
             {
                 EnsureArgCount(args.Length, 4);
                 method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]));
+                return null;
             });
         }
 
@@ -89,6 +96,7 @@ namespace raztools
             {
                 EnsureArgCount(args.Length, 5);
                 method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]));
+                return null;
             });
         }
 
@@ -98,11 +106,77 @@ namespace raztools
             {
                 EnsureArgCount(args.Length, 6);
                 method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]), Convert<T6>(args[5]));
+                return null;
             });
         }
-        #endregion
+        #endregion // Action generic overloads
 
-        private void Add(string cmd, Action<string[]> method)
+        #region Func generic overloads with return value
+        public void AddWithReturnValue<R>(string cmd, Func<R> method)
+        {
+            Add(cmd, args =>
+            {
+                EnsureArgCount(args.Length, 0);
+                return method();
+            });
+        }
+
+        public void AddWithReturnValue<T, R>(string cmd, Func<T, R> method)
+        {
+            Add(cmd, args =>
+            {
+                EnsureArgCount(args.Length, 1);
+                return method(Convert<T>(args[0]));
+            });
+        }
+
+        public void AddWithReturnValue<T1, T2, R>(string cmd, Func<T1, T2, R> method)
+        {
+            Add(cmd, args =>
+            {
+                EnsureArgCount(args.Length, 2);
+                return method(Convert<T1>(args[0]), Convert<T2>(args[1]));
+            });
+        }
+
+        public void AddWithReturnValue<T1, T2, T3, R>(string cmd, Func<T1, T2, T3, R> method)
+        {
+            Add(cmd, args =>
+            {
+                EnsureArgCount(args.Length, 3);
+                return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]));
+            });
+        }
+
+        public void AddWithReturnValue<T1, T2, T3, T4, R>(string cmd, Func<T1, T2, T3, T4, R> method)
+        {
+            Add(cmd, args =>
+            {
+                EnsureArgCount(args.Length, 4);
+                return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]));
+            });
+        }
+
+        public void AddWithReturnValue<T1, T2, T3, T4, T5, R>(string cmd, Func<T1, T2, T3, T4, T5, R> method)
+        {
+            Add(cmd, args =>
+            {
+                EnsureArgCount(args.Length, 5);
+                return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]));
+            });
+        }
+
+        public void AddWithReturnValue<T1, T2, T3, T4, T5, T6, R>(string cmd, Func<T1, T2, T3, T4, T5, T6, R> method)
+        {
+            Add(cmd, args =>
+            {
+                EnsureArgCount(args.Length, 6);
+                return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]), Convert<T6>(args[5]));
+            });
+        }
+        #endregion // Func generic overloads with return value
+
+        private void Add(string cmd, Command method)
         {
             m_commands.Add(cmd, method);
         }
@@ -112,19 +186,19 @@ namespace raztools
             get { return m_commands.Keys.ToArray(); }
         }
 
-        public void Exec(string cmdline)
+        public object Exec(string cmdline)
         {
             if (string.IsNullOrEmpty(cmdline))
-                return;
+                return null;
 
             var args = cmdline.Split(new char[] { ' ' });
             var cmd = args[0];
             args = args.Skip(1).ToArray();
 
-            if (!m_commands.TryGetValue(cmd, out Action<string[]> method))
+            if (!m_commands.TryGetValue(cmd, out Command method))
                 throw new Exception("command not found: " + cmd);
 
-            method(args);
+            return method(args);
         }
     }
 }
