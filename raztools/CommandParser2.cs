@@ -26,17 +26,6 @@ namespace raztools
     {
         private Dictionary<string, Command> m_commands = new Dictionary<string, Command>();
 
-        private static void EnsureArgCount(int got, int want)
-        {
-            if (got != want)
-                throw new Exception(string.Format("got {0} args instead of {1}", got, want));
-        }
-
-        private static T Convert<T>(string value)
-        {
-            return (T)System.Convert.ChangeType(value, typeof(T));
-        }
-
         public void Add(string cmd, Action method) => Add(cmd, Command.FromAction(method));
         public void Add<T>(string cmd, Action<T> method) => Add(cmd, Command.FromAction(method));
         public void Add<T1, T2>(string cmd, Action<T1, T2> method) => Add(cmd, Command.FromAction(method));
@@ -86,7 +75,18 @@ namespace raztools
             {
                 m_func = func;
             }
-            
+
+            private static void EnsureArgCount(int got, int want)
+            {
+                if (got != want)
+                    throw new Exception(string.Format("got {0} args instead of {1}", got, want));
+            }
+
+            private static T Convert<T>(string value)
+            {
+                return (T)System.Convert.ChangeType(value, typeof(T));
+            }
+
             public object Invoke(string[] args)
             {
                 return m_func(args);
