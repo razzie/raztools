@@ -22,8 +22,6 @@ using System.Linq;
 
 namespace raztools
 {
-    using Command = Func<string[], object>;
-
     public class CommandParser2
     {
         private Dictionary<string, Command> m_commands = new Dictionary<string, Command>();
@@ -40,143 +38,26 @@ namespace raztools
         }
 
         #region Action generic overloads
-        public void Add(string cmd, Action method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 0);
-                method();
-                return null;
-            });
-        }
-
-        public void Add<T>(string cmd, Action<T> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 1);
-                method(Convert<T>(args[0]));
-                return null;
-            });
-        }
-
-        public void Add<T1, T2>(string cmd, Action<T1, T2> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 2);
-                method(Convert<T1>(args[0]), Convert<T2>(args[1]));
-                return null;
-            });
-        }
-
-        public void Add<T1, T2, T3>(string cmd, Action<T1, T2, T3> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 3);
-                method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]));
-                return null;
-            });
-        }
-
-        public void Add<T1, T2, T3, T4>(string cmd, Action<T1, T2, T3, T4> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 4);
-                method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]));
-                return null;
-            });
-        }
-
-        public void Add<T1, T2, T3, T4, T5>(string cmd, Action<T1, T2, T3, T4, T5> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 5);
-                method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]));
-                return null;
-            });
-        }
-
-        public void Add<T1, T2, T3, T4, T5, T6>(string cmd, Action<T1, T2, T3, T4, T5, T6> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 6);
-                method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]), Convert<T6>(args[5]));
-                return null;
-            });
-        }
+        public void Add(string cmd, Action method) => Add(cmd, Command.FromAction(method));
+        public void Add<T>(string cmd, Action<T> method) => Add(cmd, Command.FromAction(method));
+        public void Add<T1, T2>(string cmd, Action<T1, T2> method) => Add(cmd, Command.FromAction(method));
+        public void Add<T1, T2, T3>(string cmd, Action<T1, T2, T3> method) => Add(cmd, Command.FromAction(method));
+        public void Add<T1, T2, T3, T4>(string cmd, Action<T1, T2, T3, T4> method) => Add(cmd, Command.FromAction(method));
+        public void Add<T1, T2, T3, T4, T5>(string cmd, Action<T1, T2, T3, T4, T5> method) => Add(cmd, Command.FromAction(method));
+        public void Add<T1, T2, T3, T4, T5, T6>(string cmd, Action<T1, T2, T3, T4, T5, T6> method) => Add(cmd, Command.FromAction(method));
         #endregion // Action generic overloads
 
         #region Func generic overloads with return value
-        public void AddWithReturnValue<R>(string cmd, Func<R> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 0);
-                return method();
-            });
-        }
-
-        public void AddWithReturnValue<T, R>(string cmd, Func<T, R> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 1);
-                return method(Convert<T>(args[0]));
-            });
-        }
-
-        public void AddWithReturnValue<T1, T2, R>(string cmd, Func<T1, T2, R> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 2);
-                return method(Convert<T1>(args[0]), Convert<T2>(args[1]));
-            });
-        }
-
-        public void AddWithReturnValue<T1, T2, T3, R>(string cmd, Func<T1, T2, T3, R> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 3);
-                return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]));
-            });
-        }
-
-        public void AddWithReturnValue<T1, T2, T3, T4, R>(string cmd, Func<T1, T2, T3, T4, R> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 4);
-                return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]));
-            });
-        }
-
-        public void AddWithReturnValue<T1, T2, T3, T4, T5, R>(string cmd, Func<T1, T2, T3, T4, T5, R> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 5);
-                return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]));
-            });
-        }
-
-        public void AddWithReturnValue<T1, T2, T3, T4, T5, T6, R>(string cmd, Func<T1, T2, T3, T4, T5, T6, R> method)
-        {
-            Add(cmd, args =>
-            {
-                EnsureArgCount(args.Length, 6);
-                return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]), Convert<T6>(args[5]));
-            });
-        }
+        public void AddWithReturnValue<R>(string cmd, Func<R> method) => Add(cmd, Command.FromTask(method));
+        public void AddWithReturnValue<T, R>(string cmd, Func<T, R> method) => Add(cmd, Command.FromTask(method));
+        public void AddWithReturnValue<T1, T2, R>(string cmd, Func<T1, T2, R> method) => Add(cmd, Command.FromTask(method));
+        public void AddWithReturnValue<T1, T2, T3, R>(string cmd, Func<T1, T2, T3, R> method) => Add(cmd, Command.FromTask(method));
+        public void AddWithReturnValue<T1, T2, T3, T4, R>(string cmd, Func<T1, T2, T3, T4, R> method) => Add(cmd, Command.FromTask(method));
+        public void AddWithReturnValue<T1, T2, T3, T4, T5, R>(string cmd, Func<T1, T2, T3, T4, T5, R> method) => Add(cmd, Command.FromTask(method));
+        public void AddWithReturnValue<T1, T2, T3, T4, T5, T6, R>(string cmd, Func<T1, T2, T3, T4, T5, T6, R> method) => Add(cmd, Command.FromTask(method));
         #endregion // Func generic overloads with return value
 
-        private void Add(string cmd, Command method)
+        public void Add(string cmd, Command method)
         {
             m_commands.Add(cmd, method);
         }
@@ -198,7 +79,155 @@ namespace raztools
             if (!m_commands.TryGetValue(cmd, out Command method))
                 throw new Exception("command not found: " + cmd);
 
-            return method(args);
+            return method.Invoke(args);
+        }
+
+        public class Command
+        {
+            private Func<string[], object> m_func;
+
+            private Command(Func<string[], object> func)
+            {
+                m_func = func;
+            }
+            
+            public object Invoke(string[] args)
+            {
+                return m_func(args);
+            }
+
+            public static Command FromAction(Action method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 0);
+                    method();
+                    return null;
+                });
+            }
+
+            public static Command FromAction<T>(Action<T> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 1);
+                    method(Convert<T>(args[0]));
+                    return null;
+                });
+            }
+
+            public static Command FromAction<T1, T2>(Action<T1, T2> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 2);
+                    method(Convert<T1>(args[0]), Convert<T2>(args[1]));
+                    return null;
+                });
+            }
+
+            public static Command FromAction<T1, T2, T3>(Action<T1, T2, T3> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 3);
+                    method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]));
+                    return null;
+                });
+            }
+
+            public static Command FromAction<T1, T2, T3, T4>(Action<T1, T2, T3, T4> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 4);
+                    method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]));
+                    return null;
+                });
+            }
+
+            public static Command FromAction<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 5);
+                    method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]));
+                    return null;
+                });
+            }
+
+            public static Command FromAction<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 6);
+                    method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]), Convert<T6>(args[5]));
+                    return null;
+                });
+            }
+
+            public static Command FromTask<R>(Func<R> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 0);
+                    return method();
+                });
+            }
+
+            public static Command FromTask<T, R>(Func<T, R> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 1);
+                    return method(Convert<T>(args[0]));
+                });
+            }
+
+            public static Command FromTask<T1, T2, R>(Func<T1, T2, R> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 2);
+                    return method(Convert<T1>(args[0]), Convert<T2>(args[1]));
+                });
+            }
+
+            public static Command FromTask<T1, T2, T3, R>(Func<T1, T2, T3, R> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 3);
+                    return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]));
+                });
+            }
+
+            public static Command FromTask<T1, T2, T3, T4, R>(Func<T1, T2, T3, T4, R> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 4);
+                    return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]));
+                });
+            }
+
+            public static Command FromTask<T1, T2, T3, T4, T5, R>(Func<T1, T2, T3, T4, T5, R> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 5);
+                    return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]));
+                });
+            }
+
+            public static Command FromTask<T1, T2, T3, T4, T5, T6, R>(Func<T1, T2, T3, T4, T5, T6, R> method)
+            {
+                return new Command(args =>
+                {
+                    EnsureArgCount(args.Length, 6);
+                    return method(Convert<T1>(args[0]), Convert<T2>(args[1]), Convert<T3>(args[2]), Convert<T4>(args[3]), Convert<T5>(args[4]), Convert<T6>(args[5]));
+                });
+            }
         }
     }
 }
